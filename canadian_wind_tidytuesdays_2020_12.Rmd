@@ -1,0 +1,27 @@
+---
+title: "canadian wind from tidytuesdays"
+author: "saryglarr"
+date: "02 12 2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+```{r}
+
+```
+
+## Including Plots
+
+
+
+```{r}
+
+```
+
+
