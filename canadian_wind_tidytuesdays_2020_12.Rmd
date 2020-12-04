@@ -13,15 +13,131 @@ knitr::opts_chunk$set(echo = TRUE)
 For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
 
 ```{r}
+library(tidyverse)
+wind_turbine<-readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-10-27/wind-turbine.csv')
+```
+Разбить по названию
+```{r}
+wind_turbine %>% 
+  count(project_name, sort = TRUE)
+
+wind_turbine %>% 
+  count(project_name) %>% 
+  top_n(11) %>% 
+  mutate(project_name = paste0('project_name == "',
+                               project_name,
+                               '"~"',
+                               project_name,
+                               '",\n')) %>% 
+  pull(project_name) %>% 
+  cat()
+```
+
+```{r}
+wind_turbine %>% 
+  mutate(manufacturer2 = case_when(manufacturer == "Vestas" ~ "Vestas",
+    manufacturer == "GE" ~ "GE",
+    manufacturer == "Siemens" ~ "Siemens",
+    manufacturer == "Enercon" ~ "Enercon",
+    manufacturer == "Senvion" ~ "Senvion",
+    TRUE ~ "Others"),
+  manufacturer2 = factor(manufacturer2, 
+                         levels = c("Vestas", 
+                                    "GE", 
+                                    "Siemens",
+                                    "Enercon",
+                                    "Senvion",
+                                    "Others")),
+ project_name2 = case_when(project_name == "Blackspring Ridge Wind"~"Blackspring Ridge Wind",
+    project_name == "Gros-Morne"~"Gros-Morne",
+    project_name == "K2 Wind Power Facility"~"K2 Wind Power Facility",
+    project_name == "Lac Alfred"~"Lac Alfred",
+    project_name == "McBride Lake"~"McBride Lake",
+    project_name == "Melancthon"~"Melancthon",
+    project_name == "Prince Wind Energy Project"~"Prince Wind Energy Project",
+    project_name == "Rivière-du-Moulin"~"Rivière-du-Moulin",
+    project_name == "Seigneurie de Beaupré"~"Seigneurie de Beaupré",
+    project_name == "South Kent Wind Farm"~"South Kent Wind Farm",
+    project_name == "Underwood Wind Farm"~"Underwood Wind Farm",
+    TRUE ~ "Others"),) -> wind_turbine 
+``` 
+
+```{r}  
+#разбить по дате
+cnd<-map_data("world", region = "Canada")
+
+cnd %>% 
+  ggplot(aes(x=long, y=lat))+
+  geom_map(map = cnd, fill = "lightgray", 
+           aes(map_id = region))+
+  geom_point( data = wind_turbine,
+              aes(x = longitude, y = latitude,
+                  color = manufacturer2))+
+  coord_quickmap()+
+  theme_void()+
+  labs(color = "")+
+  facet_wrap(~commissioning_date)+
+  theme(legend.position =  "bottom")
+```
+
+```{r}
+cnd<-map_data("world", region = "Canada")
+
+cnd %>% 
+  ggplot(aes(x=long, y=lat))+
+  geom_map(map = cnd, fill = "lightgray", 
+           aes(map_id = region))+
+  geom_point( data = wind_turbine,
+              aes(x = longitude, y = latitude,
+                  color = total_project_capacity_mw))+
+  coord_quickmap()+
+  theme_void()+
+  labs(color = "")+
+  facet_wrap(~project_name2)+
+  theme(legend.position =  "bottom")+
+  scale_color_gradient(low = "lightblue", high = "tomato")+
+  labs(title = "Canadian Wind Turbines by top projects", 
+       caption = "data from tidytuesday", 
+       color="electrical capacity in megawatts")
 
 ```
 
-## Including Plots
-
-
+Посмотреть на сколько часто встречаются одинаковые значения широты
+и долготы:
 
 ```{r}
+wind_turbine %>% 
+  #count(latitude, sort = TRUE)
+  #count(longitude, sort = TRUE)
+  count(longitude, latitude, sort = TRUE) %>% 
+  filter(n>1) %>% 
+  View()
+  
+```
 
+```{r}
+cnd %>% 
+  ggplot(aes(x=long, y=lat))+
+  geom_map(map = cnd, fill = "lightgray", 
+           aes(map_id = region))+
+  geom_point( data = wind_turbine,
+              aes(x = longitude, y = latitude,
+                  color = turbine_rated_capacity_k_w))+
+  coord_quickmap()+
+  theme_void()+
+  labs(color = "")+
+  facet_wrap(~project_name2)+
+  theme(legend.position =  "bottom")+
+  scale_color_gradient(low = "lightblue", high = "tomato")+
+  labs(title = "Canadian Wind Turbines by top projects", 
+       caption = "data from tidytuesday", 
+       color="turbine_rated_capacity_k_w")
+
+```
+
+```{r}
+cnd %>% 
+  count(subregion)
 ```
 
 
